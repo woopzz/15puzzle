@@ -5,7 +5,7 @@ function init() {
     new Controller(model, fieldView);
 
     model.addSubscriberForBoxChanges(fieldView);
-    model.addSubscriberForWonChanges(wonMsgView);
+    model.addSubscriberForGameStatusChanges(wonMsgView);
     model.init();
 }
 
@@ -22,9 +22,9 @@ class Model {
 
     constructor() {
         this._boxes = Array.from(this._BOXES_IN_RIGHT_ORDER);
-        this._won = true;
+        this._finished = true;
         this._subscribersForBoxChanges = new Set();
-        this._subscribersForWonChanges = new Set();
+        this._subscribersForGameStatusChanges = new Set();
     }
 
     init() {
@@ -35,8 +35,8 @@ class Model {
         this._subscribersForBoxChanges.add(subscriber);
     }
 
-    addSubscriberForWonChanges(subscriber) {
-        this._subscribersForWonChanges.add(subscriber);
+    addSubscriberForGameStatusChanges(subscriber) {
+        this._subscribersForGameStatusChanges.add(subscriber);
     }
 
     shuffleBoxes() {
@@ -47,7 +47,7 @@ class Model {
             this._boxes[anotherIndex] = tmp;
         }
         this._notifyBoxOrderChanged();
-        this._updateWonFlag();
+        this._updateGameStatus();
     }
 
     moveBox(box) {
@@ -62,19 +62,19 @@ class Model {
             this._boxes[boxIndex] = this._EMPTY_BOX;
             this._boxes[emptyBoxIndex] = box;
             this._notifyBoxOrderChanged();
-            this._updateWonFlag();
+            this._updateGameStatus();
         }
     }
 
-    _updateWonFlag() {
-        const won = this._didWin();
-        if (this._won !== won) {
-            this._won = won;
-            this._notifyWonChanged();
+    _updateGameStatus() {
+        const finished = this.isFinished();
+        if (this._finished !== finished) {
+            this._finished = finished;
+            this._notifyGameStatusChanged();
         }
     }
 
-    _didWin() {
+    isFinished() {
         for (let i = 0; i < this._boxes.length; i++) {
             if (this._boxes[i] !== this._BOXES_IN_RIGHT_ORDER[i]) {
                 return false;
@@ -89,9 +89,9 @@ class Model {
         }
     }
 
-    _notifyWonChanged() {
-        for (let subscriber of this._subscribersForWonChanges) {
-            subscriber.onWonChanged(this._won);
+    _notifyGameStatusChanged() {
+        for (let subscriber of this._subscribersForGameStatusChanges) {
+            subscriber.onGameStatusChanged(this._finished);
         }
     }
 
@@ -104,8 +104,8 @@ class WonMessageView {
         this._node = node;
     }
 
-    onWonChanged(won) {
-        this._node.style.display = won ? 'block' : 'none';
+    onGameStatusChanged(finished) {
+        this._node.style.display = finished ? 'block' : 'none';
     }
 
 }
