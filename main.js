@@ -52,12 +52,7 @@ class Model {
 
     moveBox(box) {
         const boxIndex = this._boxes.indexOf(box);
-        if (boxIndex === -1) {
-            return;
-        }
-
         const emptyBoxIndex = this._boxes.indexOf(this._EMPTY_BOX);
-
         if (
             boxIndex - 4 === emptyBoxIndex ||
             boxIndex + 4 === emptyBoxIndex ||
