@@ -1,11 +1,9 @@
 function init() {
     const model = new Model();
-    const fieldView = new FieldView(document.querySelector('.field'));
-    const wonMsgView = new WonMessageView(document.querySelector('.won-msg'));
-    new Controller(model, fieldView);
+    const view = new View(document.body);
+    new Controller(model, view);
 
-    model.addSubscriberForBoxChanges(fieldView);
-    model.addSubscriberForGameStatusChanges(wonMsgView);
+    model.addSubscriber(view);
     model.init();
 }
 
@@ -23,20 +21,15 @@ class Model {
     constructor() {
         this._boxes = Array.from(this._BOXES_IN_RIGHT_ORDER);
         this._finished = true;
-        this._subscribersForBoxChanges = new Set();
-        this._subscribersForGameStatusChanges = new Set();
+        this._subscribers = new Set();
     }
 
     init() {
         this.shuffleBoxes();
     }
 
-    addSubscriberForBoxChanges(subscriber) {
-        this._subscribersForBoxChanges.add(subscriber);
-    }
-
-    addSubscriberForGameStatusChanges(subscriber) {
-        this._subscribersForGameStatusChanges.add(subscriber);
+    addSubscriber(subscriber) {
+        this._subscribers.add(subscriber);
     }
 
     shuffleBoxes() {
@@ -84,13 +77,13 @@ class Model {
     }
 
     _notifyBoxOrderChanged() {
-        for (let subscriber of this._subscribersForBoxChanges) {
+        for (let subscriber of this._subscribers) {
             subscriber.onBoxOrderChanged(Array.from(this._boxes));
         }
     }
 
     _notifyGameStatusChanged() {
-        for (let subscriber of this._subscribersForGameStatusChanges) {
+        for (let subscriber of this._subscribers) {
             subscriber.onGameStatusChanged(this._finished);
         }
     }
@@ -98,27 +91,20 @@ class Model {
 }
 
 
-class WonMessageView {
+class View {
 
     constructor(node) {
-        this._node = node;
+        this._rootNode = node;
+        this._fieldNode = node.querySelector('.field');
+        this._wonMsgNode = node.querySelector('.won-msg');
     }
 
     onGameStatusChanged(finished) {
-        this._node.style.display = finished ? 'block' : 'none';
-    }
-
-}
-
-
-class FieldView {
-
-    constructor(node) {
-        this._node = node;
+        this._wonMsgNode.style.display = finished ? 'block' : 'none';
     }
 
     onBoxOrderChanged(boxes) {
-        const boxNodes = this._node.children;
+        const boxNodes = this._fieldNode.children;
 
         for (let i = 0; i < boxes.length; i++) {
             boxNodes[i].dataset.number = boxes[i];
@@ -126,7 +112,7 @@ class FieldView {
     }
 
     setupCommandMoveBox(handler) {
-        this._node.addEventListener('click', function (event) {
+        this._fieldNode.addEventListener('click', function (event) {
             const node = event.target;
             if (node.classList.contains('box')) {
                 const box = node.dataset.number;
@@ -140,10 +126,8 @@ class FieldView {
 
 class Controller {
 
-    constructor(model, fieldView) {
-        this._model = model;
-        this._fieldView = fieldView;
-        this._fieldView.setupCommandMoveBox(box => this._model.moveBox(box));
+    constructor(model, view) {
+        view.setupCommandMoveBox(box => model.moveBox(box));
     }
 
 }
