@@ -33,12 +33,7 @@ class Model {
     }
 
     shuffleBoxes() {
-        for (let index = this._boxes.length - 1; index > 0; index--) {
-            const anotherIndex = Math.floor(Math.random() * index);
-            const tmp = this._boxes[index];
-            this._boxes[index] = this._boxes[anotherIndex];
-            this._boxes[anotherIndex] = tmp;
-        }
+        new Shuffle(this._boxes, this._EMPTY_BOX).execute();
         this._notifyBoxOrderChanged();
         this._updateGameStatus();
     }
@@ -128,6 +123,59 @@ class Controller {
 
     constructor(model, view) {
         view.setupCommandMoveBox(box => model.moveBox(box));
+    }
+
+}
+
+
+class Shuffle {
+
+    constructor(boxes, emptyBox) {
+        this._boxes = boxes;
+        this._emptyBox = emptyBox;
+    }
+
+    execute() {
+        while (true) {
+            this._shuffle();
+            if (this._isSolvable()) break;
+        }
+    }
+
+    _shuffle() {
+        for (let index = this._boxes.length - 1; index > 0; index--) {
+            const anotherIndex = Math.floor(Math.random() * index);
+            const tmp = this._boxes[index];
+            this._boxes[index] = this._boxes[anotherIndex];
+            this._boxes[anotherIndex] = tmp;
+        }
+    }
+
+    _isSolvable() {
+        const emptyBoxOnRowWithOddIndex = this._findEmptyBoxRowReversedIndex() & 1;
+        const inversionsCountIsOddNumber = this._calcInversionsCount() & 1;
+        return emptyBoxOnRowWithOddIndex ^ inversionsCountIsOddNumber;
+    }
+
+    _findEmptyBoxRowReversedIndex() {
+        const index = this._boxes.indexOf(this._emptyBox);
+        return 4 - Math.floor(index / 4);
+    }
+
+    _calcInversionsCount() {
+        let count = 0;
+        for (let i = 0; i < this._boxes.length - 1; i++) {
+            for (let j = i + 1; j < this._boxes.length; j++) {
+                if (
+                    this._boxes[i] !== this._emptyBox &&
+                    this._boxes[j] !== this._emptyBox &&
+                    +this._boxes[i] > +this._boxes[j]
+                ) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
 }
