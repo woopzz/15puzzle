@@ -60,14 +60,14 @@ class Model {
     }
 
     _updateGameStatus() {
-        const finished = this.isFinished();
+        const finished = this._isFinished();
         if (this._finished !== finished) {
             this._finished = finished;
             this._notifyGameStatusChanged();
         }
     }
 
-    isFinished() {
+    _isFinished() {
         for (let i = 0; i < this._boxes.length; i++) {
             if (this._boxes[i] !== this._BOXES_IN_RIGHT_ORDER[i]) {
                 return false;
