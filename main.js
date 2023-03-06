@@ -10,12 +10,12 @@ function init() {
 
 class Model {
 
-    _EMPTY_BOX = ''
+    _EMPTY_BOX = 0
     _BOXES_IN_RIGHT_ORDER = [
-        '1', '2', '3', '4',
-        '5', '6', '7', '8',
-        '9', '10', '11', '12',
-        '13', '14', '15', this._EMPTY_BOX,
+        1, 2, 3, 4,
+        5, 6, 7, 8,
+        9, 10, 11, 12,
+        13, 14, 15, this._EMPTY_BOX,
     ]
 
     constructor() {
@@ -110,7 +110,7 @@ class View {
         this._fieldNode.addEventListener('click', function (event) {
             const node = event.target;
             if (node.classList.contains('box')) {
-                const box = node.dataset.number;
+                const box = +node.dataset.number;
                 handler(box);
             }
         });
@@ -169,7 +169,7 @@ class Shuffle {
                 if (
                     this._boxes[i] !== this._emptyBox &&
                     this._boxes[j] !== this._emptyBox &&
-                    +this._boxes[i] > +this._boxes[j]
+                    this._boxes[i] > this._boxes[j]
                 ) {
                     count++;
                 }

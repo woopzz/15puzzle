@@ -53,7 +53,7 @@ h1 {
     line-height: 109px;
 }
 
-.box::before {
+.box:not([data-number="0"])::before {
     content: attr(data-number);
 }
 
