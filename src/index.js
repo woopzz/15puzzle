@@ -1,11 +1,4 @@
-function init() {
-    const model = new Model();
-    const view = new View(document.body);
-    new Controller(model, view);
-
-    model.addSubscriber(view);
-    model.init();
-}
+import './style.css';
 
 
 class Model {
@@ -179,3 +172,15 @@ class Shuffle {
     }
 
 }
+
+function init() {
+    const model = new Model();
+    const view = new View(document.body);
+    new Controller(model, view);
+
+    model.addSubscriber(view);
+    model.init();
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
