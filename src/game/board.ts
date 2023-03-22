@@ -3,12 +3,21 @@ import { LockedTiles } from './lockedTiles';
 export const SOLVED_BOARD_STATE = '0123456789ABCDEF';
 export const BLANK_TILE = 'F';
 
+export enum Direction {
+    UP = 'u',
+    LEFT = 'l',
+    DOWN = 'd',
+    RIGHT = 'r',
+}
+
 export class Board implements Board {
     readonly state: string;
+    readonly path: Array<Direction>;
     private blankTileIndex: number;
 
-    constructor(state: string) {
+    constructor(state: string, path: Array<Direction> = []) {
         this.state = state;
+        this.path = path;
         this.blankTileIndex = state.indexOf(BLANK_TILE);
     }
 
@@ -18,7 +27,7 @@ export class Board implements Board {
         if (nextIndex < 0 || LockedTiles.getInstance().locked(nextIndex))
             return null;
 
-        return this.go(nextIndex);
+        return this.go(nextIndex, Direction.UP);
     }
 
     goLeft(): Board | null {
@@ -27,7 +36,7 @@ export class Board implements Board {
         if (this.blankTileIndex % 4 === 0 || LockedTiles.getInstance().locked(nextIndex))
             return null;
 
-        return this.go(this.blankTileIndex - 1);
+        return this.go(this.blankTileIndex - 1, Direction.LEFT);
     }
 
     goDown(): Board | null {
@@ -36,7 +45,7 @@ export class Board implements Board {
         if (nextIndex >= 16 || LockedTiles.getInstance().locked(nextIndex))
             return null;
 
-        return this.go(nextIndex);
+        return this.go(nextIndex, Direction.DOWN);
     }
 
     goRight(): Board | null {
@@ -45,16 +54,17 @@ export class Board implements Board {
         if (this.blankTileIndex % 4 === 3 || LockedTiles.getInstance().locked(nextIndex))
             return null;
 
-        return this.go(nextIndex);
+        return this.go(nextIndex, Direction.RIGHT);
     }
 
-    private go(tileIndex: number): Board {
+    private go(tileIndex: number, direction: Direction): Board {
         const firstIndex = this.blankTileIndex < tileIndex ? this.blankTileIndex : tileIndex;
         const secondIndex = this.blankTileIndex > tileIndex ? this.blankTileIndex : tileIndex;
         return new Board(
             this.state.slice(0, firstIndex) + this.state[secondIndex] +
             this.state.slice(firstIndex + 1, secondIndex) +
-            this.state[firstIndex] + this.state.slice(secondIndex + 1)
+            this.state[firstIndex] + this.state.slice(secondIndex + 1),
+            [...this.path, direction]
         );
     }
 }

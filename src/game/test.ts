@@ -4,7 +4,7 @@
     8 9 A B
     C D E F
 **/
-import { Board, solvable, SOLVED_BOARD_STATE } from './board';
+import { Board, Direction, solvable, SOLVED_BOARD_STATE } from './board';
 import { Shuffle } from './shuffle';
 import { Solve } from './solve';
 
@@ -52,6 +52,21 @@ describe('Shuffle', function () {
 
 describe('Solve', function () {
     it('should find a way to get the solved board', function () {
-        expect(solve(buildBoard('508923D6BE1AFC74')).state).toEqual(SOLVED_BOARD_STATE);
+        const initialBoard = buildBoard('508923D6BE1AFC74');
+        const solvedBoard = solve(initialBoard);
+
+        expect(solvedBoard.state).toEqual(SOLVED_BOARD_STATE);
+
+        let tempBoard: Board = initialBoard;
+        for (const direction of solvedBoard.path) {
+            switch (direction) {
+                case Direction.UP: tempBoard = tempBoard.goUp(); break;
+                case Direction.LEFT: tempBoard = tempBoard.goLeft(); break;
+                case Direction.DOWN: tempBoard = tempBoard.goDown(); break;
+                case Direction.RIGHT: tempBoard = tempBoard.goRight(); break;
+            }
+        }
+
+        expect(tempBoard.state).toEqual(SOLVED_BOARD_STATE);
     });
 });

@@ -36,6 +36,7 @@ export class Solve {
         lockedTiles.lock(7);
 
         board = this.bfs(board, new PositionManyTiles([['8', 8], ['9', 9], ['A', 10], ['B', 11], ['C', 12], ['D', 13], ['E', 14], ['F', 15]]));
+        lockedTiles.reset();
 
         return board;
     }
