@@ -1,6 +1,7 @@
 import { LockedTiles } from './lockedTiles';
 
 export const SOLVED_BOARD_STATE = '0123456789ABCDEF';
+export const BLANK_TILE = 'F';
 
 export class Board implements Board {
     readonly state: string;
@@ -8,7 +9,7 @@ export class Board implements Board {
 
     constructor(state: string) {
         this.state = state;
-        this.blankTileIndex = state.indexOf('F');
+        this.blankTileIndex = state.indexOf(BLANK_TILE);
     }
 
     goUp(): Board | null {
@@ -65,7 +66,7 @@ export function solvable(board: Board): boolean {
 }
 
 function findEmptyBoxRowReversedIndex(board: Board): number {
-    const index = board.state.indexOf('F');
+    const index = board.state.indexOf(BLANK_TILE);
     return 4 - Math.floor(index / 4);
 }
 
@@ -74,8 +75,8 @@ function calcInversionsCount(board: Board): number {
     for (let i = 0; i < board.state.length - 1; i++) {
         for (let j = i + 1; j < board.state.length; j++) {
             if (
-                board.state[i] !== 'F' &&
-                board.state[j] !== 'F' &&
+                board.state[i] !== BLANK_TILE &&
+                board.state[j] !== BLANK_TILE &&
                 board.state[i] > board.state[j]
             ) {
                 count++;

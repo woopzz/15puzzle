@@ -1,5 +1,5 @@
 import { PriorityQueue } from '@datastructures-js/priority-queue';
-import { Board } from './board';
+import { BLANK_TILE, Board } from './board';
 import { LockedTiles } from './lockedTiles';
 
 export class Solve {
@@ -25,12 +25,12 @@ export class Solve {
         board = this.bfs(board, new PositionOneTile('5', 5));
         lockedTiles.lock(5);
 
-        board = this.bfs(board, new PositionManyTiles([['2', 3], ['3', 10], ['F', 6]]));
+        board = this.bfs(board, new PositionManyTiles([['2', 3], ['3', 10], [BLANK_TILE, 6]]));
         board = this.applyFormula(board);
         lockedTiles.lock(2);
         lockedTiles.lock(3);
 
-        board = this.bfs(board, new PositionManyTiles([['6', 7], ['7', 14], ['F', 10]]));
+        board = this.bfs(board, new PositionManyTiles([['6', 7], ['7', 14], [BLANK_TILE, 10]]));
         board = this.applyFormula(board);
         lockedTiles.lock(6);
         lockedTiles.lock(7);
@@ -124,7 +124,7 @@ class PositionOneTile implements SolveStrategy {
     }
 
     private calcManhattanDistance(board: Board) {
-        const blankTileIndex = board.state.indexOf('F');
+        const blankTileIndex = board.state.indexOf(BLANK_TILE);
         const index = board.state.indexOf(this.tile);
 
         const curCol = calcCol(index);
@@ -132,7 +132,7 @@ class PositionOneTile implements SolveStrategy {
 
         let destCol: number;
         let destRow: number;
-        if (near(index, blankTileIndex) || this.tile == 'F') {
+        if (near(index, blankTileIndex) || this.tile == BLANK_TILE) {
             destCol = calcCol(this.destIndex);
             destRow = calcRow(this.destIndex);
         } else {
