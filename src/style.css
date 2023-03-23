@@ -57,6 +57,26 @@ h1 {
     content: attr(data-number);
 }
 
+.buttons-panel {
+    margin: 0 auto;
+    padding: 2rem 0;
+    max-width: var(--ws-width);
+}
+
+.buttons-panel .button {
+    padding: 0.5rem;
+    display: inline-block;
+
+    font-size: 1.5rem;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.buttons-panel .button:hover {
+    background-color: rgb(180, 180, 180);
+}
+
 @media screen and (max-width: 520px) {
     h1 {
         margin: 2rem 0;

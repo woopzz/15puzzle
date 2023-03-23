@@ -1,4 +1,6 @@
 import './style.css';
+import { Solve } from './game/solve';
+import { BLANK_TILE, Board, Direction } from './game/board';
 
 
 class Model {
@@ -15,6 +17,11 @@ class Model {
         this._boxes = Array.from(this._BOXES_IN_RIGHT_ORDER);
         this._finished = true;
         this._subscribers = new Set();
+        this._path = null;
+    }
+
+    get board() {
+        return this._boxes.map(box => box === this._EMPTY_BOX ? BLANK_TILE : (box - 1).toString(16)).join('').toUpperCase();
     }
 
     init() {
@@ -23,6 +30,11 @@ class Model {
 
     addSubscriber(subscriber) {
         this._subscribers.add(subscriber);
+    }
+
+    setPath(path) {
+        this._path = path;
+        this._notifyBoxOrderChanged();
     }
 
     shuffleBoxes() {
@@ -34,6 +46,22 @@ class Model {
     moveBox(box) {
         const boxIndex = this._boxes.indexOf(box);
         const emptyBoxIndex = this._boxes.indexOf(this._EMPTY_BOX);
+
+        if (this._path && this._path.length) {
+            let destIndex;
+            switch (this._path.at(-1)) {
+                case Direction.UP: destIndex = emptyBoxIndex - 4; break;
+                case Direction.LEFT: destIndex = emptyBoxIndex - 1; break;
+                case Direction.DOWN: destIndex = emptyBoxIndex + 4; break;
+                case Direction.RIGHT: destIndex = emptyBoxIndex + 1; break;
+            }
+            if (destIndex === boxIndex) {
+                this._path.pop();
+            } else {
+                this._path = null;
+            }
+        }
+
         if (
             boxIndex - 4 === emptyBoxIndex ||
             boxIndex + 4 === emptyBoxIndex ||
@@ -66,7 +94,7 @@ class Model {
 
     _notifyBoxOrderChanged() {
         for (let subscriber of this._subscribers) {
-            subscriber.onBoxOrderChanged(Array.from(this._boxes));
+            subscriber.onBoxOrderChanged(Array.from(this._boxes), this._path);
         }
     }
 
@@ -85,17 +113,32 @@ class View {
         this._rootNode = node;
         this._fieldNode = node.querySelector('.field');
         this._wonMsgNode = node.querySelector('.won-msg');
+        this._hintNode = node.querySelector('.hint');
     }
 
     onGameStatusChanged(finished) {
         this._wonMsgNode.style.display = finished ? 'block' : 'none';
     }
 
-    onBoxOrderChanged(boxes) {
+    onBoxOrderChanged(boxes, path) {
         const boxNodes = this._fieldNode.children;
 
         for (let i = 0; i < boxes.length; i++) {
             boxNodes[i].dataset.number = boxes[i];
+            boxNodes[i].style.backgroundColor = '';
+        }
+
+        const blankBoxIndex = boxes.indexOf(0);
+
+        if (path && path.length) {
+            let destIndex;
+            switch (path.at(-1)) {
+                case Direction.UP: destIndex = blankBoxIndex - 4; break;
+                case Direction.LEFT: destIndex = blankBoxIndex - 1; break;
+                case Direction.DOWN: destIndex = blankBoxIndex + 4; break;
+                case Direction.RIGHT: destIndex = blankBoxIndex + 1; break;
+            }
+            boxNodes[destIndex].style.backgroundColor = '#bbb';
         }
     }
 
@@ -109,6 +152,10 @@ class View {
         });
     }
 
+    setupCommandHint(handler) {
+        this._hintNode.addEventListener('click', () => handler());
+    }
+
 }
 
 
@@ -116,6 +163,10 @@ class Controller {
 
     constructor(model, view) {
         view.setupCommandMoveBox(box => model.moveBox(box));
+        view.setupCommandHint(function () {
+            const solvedBoard = new Solve(new Board(model.board)).execute();
+            model.setPath(solvedBoard.path.reverse());
+        });
     }
 
 }
