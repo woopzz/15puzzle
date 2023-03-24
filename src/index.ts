@@ -1,6 +1,6 @@
 import './style.css';
 
-import { Board, SOLVED_BOARD_STATE } from './game/board';
+import { Board, solved, SOLVED_BOARD_STATE } from './game/board';
 import { Shuffle } from './game/shuffle';
 import { Solve } from './game/solve';
 
@@ -33,8 +33,7 @@ function repaintUI(board: Board, path: Array<number>): void {
         boxNode.style.backgroundColor = '#bbb';
     }
 
-    const solved = board.state === SOLVED_BOARD_STATE;
-    wonMsgNode.style.display = solved ? 'block' : 'none';
+    wonMsgNode.style.display = solved(board) ? 'block' : 'none';
 }
 
 function init(): void {

@@ -1,4 +1,4 @@
-import { Board, solvable } from './board';
+import { Board, solvable, solved } from './board';
 
 export class Shuffle {
     private board: Board;
@@ -10,7 +10,7 @@ export class Shuffle {
     execute(): Board {
         while (true) {
             this.shuffle();
-            if (solvable(this.board)) break;
+            if (solvable(this.board) && !solved(this.board)) break;
         }
         return this.board;
     }

@@ -34,6 +34,10 @@ export class Board implements Board {
     }
 }
 
+export function solved(board: Board): boolean {
+    return board.state === SOLVED_BOARD_STATE;
+}
+
 export function solvable(board: Board): boolean {
     const emptyBoxOnRowWithOddIndex = findEmptyBoxRowReversedIndex(board) & 1;
     const inversionsCountIsOddNumber = calcInversionsCount(board) & 1;
