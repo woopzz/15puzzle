@@ -52,7 +52,6 @@ export class Solve {
         if (!checkTilesOnTheirPlaces(board, ['8', '9', 'A', 'B', 'C', 'D', 'E', 'F'])) {
             board = this.bfs(board, new PositionManyTiles([['8', 8], ['9', 9], ['A', 10], ['B', 11], ['C', 12], ['D', 13], ['E', 14], ['F', 15]]));
         }
-        this.lockedTiles.reset();
 
         return board;
     }

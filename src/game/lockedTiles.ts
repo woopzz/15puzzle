@@ -2,7 +2,7 @@ export class LockedTiles {
     private state: Array<boolean>;
 
     constructor() {
-        this.reset();
+        this.state = new Array<boolean>(16).fill(false);
     }
 
     locked(index: number): boolean {
@@ -15,9 +15,5 @@ export class LockedTiles {
 
     unlock(index: number): void {
         this.state[index] = false;
-    }
-
-    reset(): void {
-        this.state = new Array<boolean>(16).fill(false);
     }
 }
