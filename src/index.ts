@@ -36,8 +36,10 @@ function repaintUI(board: Board, path: Array<number>): void {
     wonMsgNode.style.display = solved(board) ? 'block' : 'none';
 }
 
+const getShuffledBoard = (): Board => new Shuffle(new Board(SOLVED_BOARD_STATE, [])).execute();
+
 function init(): void {
-    let board = new Shuffle(new Board(SOLVED_BOARD_STATE, [])).execute()
+    let board = getShuffledBoard();
     let path: Array<number> = [];
     const _repaintUI = () => repaintUI(board, path);
 
@@ -63,6 +65,12 @@ function init(): void {
     document.querySelector('.hint').addEventListener('click', function () {
         const solvedBoard = new Solve(board).execute();
         path = solvedBoard.path.reverse();
+        _repaintUI();
+    });
+
+    document.querySelector('.shuffle').addEventListener('click', function () {
+        board = getShuffledBoard();
+        path = [];
         _repaintUI();
     });
 
