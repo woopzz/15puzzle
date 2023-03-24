@@ -82,4 +82,7 @@ describe('Solve', function () {
 
         expect(tempBoard.state).toEqual(SOLVED_BOARD_STATE);
     });
+    it('should return an empty path if the board is solved in the first place', function () {
+        expect(solve(buildBoard(SOLVED_BOARD_STATE)).path.length).toStrictEqual(0);
+    });
 });

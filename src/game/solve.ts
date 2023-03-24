@@ -1,11 +1,15 @@
 import { PriorityQueue } from '@datastructures-js/priority-queue';
-import { BLANK_TILE, Board } from './board';
+import { BLANK_TILE, Board, SOLVED_BOARD_STATE } from './board';
 import { LockedTiles } from './lockedTiles';
 
 const calcIndexOfTileAbove = (board: Board): number => board.blankTileIndex - 4;
 const calcIndexOfTileOnTheLeft = (board: Board): number => board.blankTileIndex - 1;
 const calcIndexOfTileBelow = (board: Board): number => board.blankTileIndex + 4;
 const calcIndexOfTileOnTheRight = (board: Board): number => board.blankTileIndex + 1;
+
+function checkTilesOnTheirPlaces(board: Board, tiles: Array<string>): boolean {
+    return tiles.filter(tile => board.state.indexOf(tile) !== SOLVED_BOARD_STATE.indexOf(tile)).length === 0;
+}
 
 export class Solve {
     private initialBoard: Board;
@@ -19,29 +23,35 @@ export class Solve {
     execute(): Board {
         let board = this.initialBoard;
 
-        board = this.bfs(board, new PositionOneTile('0', 0));
+        if (!checkTilesOnTheirPlaces(board, ['0'])) board = this.bfs(board, new PositionOneTile('0', 0));
         this.lockedTiles.lock(0);
 
-        board = this.bfs(board, new PositionOneTile('1', 1));
+        if (!checkTilesOnTheirPlaces(board, ['1'])) board = this.bfs(board, new PositionOneTile('1', 1));
         this.lockedTiles.lock(1);
 
-        board = this.bfs(board, new PositionOneTile('4', 4));
+        if (!checkTilesOnTheirPlaces(board, ['4'])) board = this.bfs(board, new PositionOneTile('4', 4));
         this.lockedTiles.lock(4);
 
-        board = this.bfs(board, new PositionOneTile('5', 5));
+        if (!checkTilesOnTheirPlaces(board, ['5'])) board = this.bfs(board, new PositionOneTile('5', 5));
         this.lockedTiles.lock(5);
 
-        board = this.bfs(board, new PositionManyTiles([['2', 3], ['3', 10], [BLANK_TILE, 6]]));
-        board = this.applyFormula(board);
+        if (!checkTilesOnTheirPlaces(board, ['2', '3'])) {
+            board = this.bfs(board, new PositionManyTiles([['2', 3], ['3', 10], [BLANK_TILE, 6]]));
+            board = this.applyFormula(board);
+        }
         this.lockedTiles.lock(2);
         this.lockedTiles.lock(3);
 
-        board = this.bfs(board, new PositionManyTiles([['6', 7], ['7', 14], [BLANK_TILE, 10]]));
-        board = this.applyFormula(board);
+        if (!checkTilesOnTheirPlaces(board, ['6', '7'])) {
+            board = this.bfs(board, new PositionManyTiles([['6', 7], ['7', 14], [BLANK_TILE, 10]]));
+            board = this.applyFormula(board);
+        }
         this.lockedTiles.lock(6);
         this.lockedTiles.lock(7);
 
-        board = this.bfs(board, new PositionManyTiles([['8', 8], ['9', 9], ['A', 10], ['B', 11], ['C', 12], ['D', 13], ['E', 14], ['F', 15]]));
+        if (!checkTilesOnTheirPlaces(board, ['8', '9', 'A', 'B', 'C', 'D', 'E', 'F'])) {
+            board = this.bfs(board, new PositionManyTiles([['8', 8], ['9', 9], ['A', 10], ['B', 11], ['C', 12], ['D', 13], ['E', 14], ['F', 15]]));
+        }
         this.lockedTiles.reset();
 
         return board;
