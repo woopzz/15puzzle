@@ -2,11 +2,16 @@ import { PriorityQueue } from '@datastructures-js/priority-queue';
 import { BLANK_TILE, Board } from './board';
 import { LockedTiles } from './lockedTiles';
 
+const calcIndexOfTileAbove = (board: Board): number => board.blankTileIndex - 4;
+const calcIndexOfTileOnTheLeft = (board: Board): number => board.blankTileIndex - 1;
+const calcIndexOfTileBelow = (board: Board): number => board.blankTileIndex + 4;
+const calcIndexOfTileOnTheRight = (board: Board): number => board.blankTileIndex + 1;
+
 export class Solve {
     private initialBoard: Board;
 
     constructor(initialBoard: Board) {
-        this.initialBoard = initialBoard;
+        this.initialBoard = new Board(initialBoard.state);
     }
 
     execute(): Board {
@@ -57,10 +62,15 @@ export class Solve {
             if (solveStrategy.solved(board))
                 break;
 
-            for (const go of [board.goUp.bind(board), board.goLeft.bind(board), board.goDown.bind(board), board.goRight.bind(board)]) {
-                const nextBoard = go();
-                if (nextBoard !== null && !visitedStates.has(nextBoard.state))
-                    heap.push(nextBoard);
+            for (const tileIndex of [
+                calcIndexOfTileAbove(board), calcIndexOfTileOnTheLeft(board),
+                calcIndexOfTileBelow(board), calcIndexOfTileOnTheRight(board),
+            ]) {
+                if (board.canBeMoved(tileIndex) && !LockedTiles.getInstance().locked(tileIndex)) {
+                    const nextBoard = board.move(tileIndex);
+                    if (!visitedStates.has(nextBoard.state))
+                        heap.push(nextBoard);
+                }
             }
 
             visitedStates.add(board.state);
@@ -98,7 +108,17 @@ export class Solve {
          *
          * It's true for the second row as well (tiles '6' and '7').
          */
-        return board.goDown().goRight().goUp().goUp().goLeft().goDown().goRight().goUp().goLeft().goDown();
+        board = board.move(calcIndexOfTileBelow(board));
+        board = board.move(calcIndexOfTileOnTheRight(board));
+        board = board.move(calcIndexOfTileAbove(board));
+        board = board.move(calcIndexOfTileAbove(board));
+        board = board.move(calcIndexOfTileOnTheLeft(board));
+        board = board.move(calcIndexOfTileBelow(board));
+        board = board.move(calcIndexOfTileOnTheRight(board));
+        board = board.move(calcIndexOfTileAbove(board));
+        board = board.move(calcIndexOfTileOnTheLeft(board));
+        board = board.move(calcIndexOfTileBelow(board));
+        return board;
     }
 }
 

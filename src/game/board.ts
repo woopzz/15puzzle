@@ -1,70 +1,35 @@
-import { LockedTiles } from './lockedTiles';
-
 export const SOLVED_BOARD_STATE = '0123456789ABCDEF';
 export const BLANK_TILE = 'F';
 
-export enum Direction {
-    UP = 'u',
-    LEFT = 'l',
-    DOWN = 'd',
-    RIGHT = 'r',
-}
-
 export class Board implements Board {
     readonly state: string;
-    readonly path: Array<Direction>;
-    private blankTileIndex: number;
+    readonly path: Array<number>;
+    readonly blankTileIndex: number;
 
-    constructor(state: string, path: Array<Direction> = []) {
+    constructor(state: string, path: Array<number> = []) {
         this.state = state;
         this.path = path;
         this.blankTileIndex = state.indexOf(BLANK_TILE);
     }
 
-    goUp(): Board | null {
-        const nextIndex = this.blankTileIndex - 4;
-
-        if (nextIndex < 0 || LockedTiles.getInstance().locked(nextIndex))
-            return null;
-
-        return this.go(nextIndex, Direction.UP);
+    canBeMoved(tileIndex: number): boolean {
+        if (tileIndex < 0 || tileIndex > 15) return false;
+        return (
+            (tileIndex - 4 === this.blankTileIndex) ||
+            (tileIndex + 4 === this.blankTileIndex) ||
+            (tileIndex - 1 === this.blankTileIndex && tileIndex % 4 !== 0) ||
+            (tileIndex + 1 === this.blankTileIndex && tileIndex % 4 !== 3)
+        );
     }
 
-    goLeft(): Board | null {
-        const nextIndex = this.blankTileIndex - 1;
-
-        if (this.blankTileIndex % 4 === 0 || LockedTiles.getInstance().locked(nextIndex))
-            return null;
-
-        return this.go(this.blankTileIndex - 1, Direction.LEFT);
-    }
-
-    goDown(): Board | null {
-        const nextIndex = this.blankTileIndex + 4;
-
-        if (nextIndex >= 16 || LockedTiles.getInstance().locked(nextIndex))
-            return null;
-
-        return this.go(nextIndex, Direction.DOWN);
-    }
-
-    goRight(): Board | null {
-        const nextIndex = this.blankTileIndex + 1;
-
-        if (this.blankTileIndex % 4 === 3 || LockedTiles.getInstance().locked(nextIndex))
-            return null;
-
-        return this.go(nextIndex, Direction.RIGHT);
-    }
-
-    private go(tileIndex: number, direction: Direction): Board {
+    move(tileIndex: number): Board {
         const firstIndex = this.blankTileIndex < tileIndex ? this.blankTileIndex : tileIndex;
         const secondIndex = this.blankTileIndex > tileIndex ? this.blankTileIndex : tileIndex;
         return new Board(
             this.state.slice(0, firstIndex) + this.state[secondIndex] +
             this.state.slice(firstIndex + 1, secondIndex) +
             this.state[firstIndex] + this.state.slice(secondIndex + 1),
-            [...this.path, direction]
+            [...this.path, tileIndex]
         );
     }
 }

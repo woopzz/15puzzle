@@ -5,7 +5,7 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 module.exports = {
     mode: 'none',
-    entry: './src/index.js',
+    entry: './src/index.ts',
     optimization: {
         splitChunks: {
             cacheGroups: {

@@ -4,7 +4,7 @@
     8 9 A B
     C D E F
 **/
-import { Board, Direction, solvable, SOLVED_BOARD_STATE } from './board';
+import { Board, solvable, SOLVED_BOARD_STATE } from './board';
 import { Shuffle } from './shuffle';
 import { Solve } from './solve';
 
@@ -22,17 +22,35 @@ function solve(board: Board): Board {
 }
 
 describe('Board', function () {
-    it('should return a correct board when move is possible', function () {
-        expect(buildBoard('0123456789ABCDEF').goUp().state).toEqual('0123456789AFCDEB');
-        expect(buildBoard('0123456789ABCDEF').goLeft().state).toEqual('0123456789ABCDFE');
-        expect(buildBoard('0123456789FBCDAE').goDown().state).toEqual('0123456789ABCDFE');
-        expect(buildBoard('0123456789ABCFED').goRight().state).toEqual('0123456789ABCEFD');
+    it('should check that a tile can be moved', function () {
+        expect(buildBoard('0123456789ABCDEF').canBeMoved(-200)).toStrictEqual(false);
+        expect(buildBoard('0123456789ABCDEF').canBeMoved(0)).toStrictEqual(false);
+        expect(buildBoard('0123456789ABCDEF').canBeMoved(10)).toStrictEqual(false);
+        expect(buildBoard('0123456789ABCDEF').canBeMoved(100)).toStrictEqual(false);
+
+        // 0 1 2 3
+        // 4 5 6 7
+        // 8 9 F A
+        // C D E B
+        expect(buildBoard('0123456789FACDEB').canBeMoved(6)).toStrictEqual(true);
+        expect(buildBoard('0123456789FACDEB').canBeMoved(9)).toStrictEqual(true);
+        expect(buildBoard('0123456789FACDEB').canBeMoved(11)).toStrictEqual(true);
+        expect(buildBoard('0123456789FACDEB').canBeMoved(14)).toStrictEqual(true);
     });
-    it('should return null when you go overboard', function () {
-        expect(new Board('012F456389A7CDEB').goUp()).toBeNull();
-        expect(new Board('F012456389A7CDEB').goLeft()).toBeNull();
-        expect(new Board('0123456789ABCDEF').goDown()).toBeNull();
-        expect(new Board('0123456789ABCDEF').goRight()).toBeNull();
+    it('should replace a tile with the blank one', function () {
+        expect(buildBoard('0123456789ABCDEF').move(11).state).toEqual('0123456789AFCDEB');
+        expect(buildBoard('0123456789ABCDEF').move(14).state).toEqual('0123456789ABCDFE');
+        expect(buildBoard('F123056749AB8CDE').move(4).state).toEqual('0123F56749AB8CDE');
+        expect(buildBoard('F123056749AB8CDE').move(1).state).toEqual('1F23056749AB8CDE');
+    });
+    it('should remember moved tiles (indexes) in a right order', function () {
+        const board = buildBoard('0123456789ABCDEF').move(14).move(10).move(9).move(13).move(14);
+        expect(board.path.length).toStrictEqual(5);
+        expect(board.path[0]).toStrictEqual(14);
+        expect(board.path[1]).toStrictEqual(10);
+        expect(board.path[2]).toStrictEqual(9);
+        expect(board.path[3]).toStrictEqual(13);
+        expect(board.path[4]).toStrictEqual(14);
     });
 });
 
@@ -58,13 +76,8 @@ describe('Solve', function () {
         expect(solvedBoard.state).toEqual(SOLVED_BOARD_STATE);
 
         let tempBoard: Board = initialBoard;
-        for (const direction of solvedBoard.path) {
-            switch (direction) {
-                case Direction.UP: tempBoard = tempBoard.goUp(); break;
-                case Direction.LEFT: tempBoard = tempBoard.goLeft(); break;
-                case Direction.DOWN: tempBoard = tempBoard.goDown(); break;
-                case Direction.RIGHT: tempBoard = tempBoard.goRight(); break;
-            }
+        for (const tileIndex of solvedBoard.path) {
+            tempBoard = tempBoard.move(tileIndex);
         }
 
         expect(tempBoard.state).toEqual(SOLVED_BOARD_STATE);
