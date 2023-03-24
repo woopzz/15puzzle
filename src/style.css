@@ -58,8 +58,8 @@ h1 {
 }
 
 .buttons-panel {
-    margin: 0 auto;
-    padding: 2rem 0;
+    margin: 2rem auto;
+    padding: 0;
     max-width: var(--ws-width);
 }
 
