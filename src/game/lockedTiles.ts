@@ -1,16 +1,8 @@
 export class LockedTiles {
-    private static instance: LockedTiles;
     private state: Array<boolean>;
 
-    private constructor() {
+    constructor() {
         this.reset();
-    }
-
-    static getInstance(): LockedTiles {
-        if (!this.instance)
-            this.instance = new LockedTiles();
-
-        return this.instance;
     }
 
     locked(index: number): boolean {

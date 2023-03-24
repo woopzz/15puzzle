@@ -9,39 +9,40 @@ const calcIndexOfTileOnTheRight = (board: Board): number => board.blankTileIndex
 
 export class Solve {
     private initialBoard: Board;
+    private lockedTiles: LockedTiles;
 
     constructor(initialBoard: Board) {
         this.initialBoard = new Board(initialBoard.state);
+        this.lockedTiles = new LockedTiles();
     }
 
     execute(): Board {
-        const lockedTiles = LockedTiles.getInstance();
         let board = this.initialBoard;
 
         board = this.bfs(board, new PositionOneTile('0', 0));
-        lockedTiles.lock(0);
+        this.lockedTiles.lock(0);
 
         board = this.bfs(board, new PositionOneTile('1', 1));
-        lockedTiles.lock(1);
+        this.lockedTiles.lock(1);
 
         board = this.bfs(board, new PositionOneTile('4', 4));
-        lockedTiles.lock(4);
+        this.lockedTiles.lock(4);
 
         board = this.bfs(board, new PositionOneTile('5', 5));
-        lockedTiles.lock(5);
+        this.lockedTiles.lock(5);
 
         board = this.bfs(board, new PositionManyTiles([['2', 3], ['3', 10], [BLANK_TILE, 6]]));
         board = this.applyFormula(board);
-        lockedTiles.lock(2);
-        lockedTiles.lock(3);
+        this.lockedTiles.lock(2);
+        this.lockedTiles.lock(3);
 
         board = this.bfs(board, new PositionManyTiles([['6', 7], ['7', 14], [BLANK_TILE, 10]]));
         board = this.applyFormula(board);
-        lockedTiles.lock(6);
-        lockedTiles.lock(7);
+        this.lockedTiles.lock(6);
+        this.lockedTiles.lock(7);
 
         board = this.bfs(board, new PositionManyTiles([['8', 8], ['9', 9], ['A', 10], ['B', 11], ['C', 12], ['D', 13], ['E', 14], ['F', 15]]));
-        lockedTiles.reset();
+        this.lockedTiles.reset();
 
         return board;
     }
@@ -66,7 +67,7 @@ export class Solve {
                 calcIndexOfTileAbove(board), calcIndexOfTileOnTheLeft(board),
                 calcIndexOfTileBelow(board), calcIndexOfTileOnTheRight(board),
             ]) {
-                if (board.canBeMoved(tileIndex) && !LockedTiles.getInstance().locked(tileIndex)) {
+                if (board.canBeMoved(tileIndex) && !this.lockedTiles.locked(tileIndex)) {
                     const nextBoard = board.move(tileIndex);
                     if (!visitedStates.has(nextBoard.state))
                         heap.push(nextBoard);
