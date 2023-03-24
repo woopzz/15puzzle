@@ -121,7 +121,7 @@ class PositionOneTile implements SolveStrategy {
     }
 
     buildCompareBoards(): (a: Board, b: Board) => number {
-        return (a: Board, b: Board) => this.calcManhattanDistance(a) < this.calcManhattanDistance(b) ? -1 : 1;
+        return (a: Board, b: Board) => this.calcManhattanDistance(a) + a.path.length < this.calcManhattanDistance(b) + b.path.length ? -1 : 1;
     }
 
     private calcManhattanDistance(board: Board) {
@@ -159,7 +159,7 @@ class PositionManyTiles implements SolveStrategy {
     }
 
     buildCompareBoards(): (a: Board, b: Board) => number {
-        return (a: Board, b: Board) => this.calcManhattanDistance(a) < this.calcManhattanDistance(b) ? -1 : 1;
+        return (a: Board, b: Board) => this.calcManhattanDistance(a) + a.path.length < this.calcManhattanDistance(b) + b.path.length ? -1 : 1;
     }
 
     private calcManhattanDistance(board: Board): number {
