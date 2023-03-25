@@ -1,4 +1,4 @@
-import { PriorityQueue } from '@datastructures-js/priority-queue';
+import { PriorityQueue } from '../misc/priorityQueue';
 import { BLANK_TILE, Board, SOLVED_BOARD_STATE } from './board';
 import { LockedTiles } from './lockedTiles';
 
@@ -57,14 +57,14 @@ export class Solve {
     }
 
     private bfs(initialBoard: Board, solveStrategy: SolveStrategy): Board {
-        const heap = new PriorityQueue<Board>(solveStrategy.buildCompareBoards());
-        heap.push(initialBoard);
+        const heap = new PriorityQueue<Board>();
+        heap.insert(initialBoard, solveStrategy.calcHeuristic(initialBoard));
 
         const visitedStates = new Set();
 
         let board: Board;
         while (true) {
-            board = heap.pop();
+            board = heap.extractMin();
 
             if (visitedStates.has(board.state))
                 continue;
@@ -79,7 +79,7 @@ export class Solve {
                 if (board.canBeMoved(tileIndex) && !this.lockedTiles.locked(tileIndex)) {
                     const nextBoard = board.move(tileIndex);
                     if (!visitedStates.has(nextBoard.state))
-                        heap.push(nextBoard);
+                        heap.insert(nextBoard, solveStrategy.calcHeuristic(nextBoard));
                 }
             }
 
@@ -134,7 +134,7 @@ export class Solve {
 
 interface SolveStrategy {
     solved: (board: Board) => boolean,
-    buildCompareBoards: () => (a: Board, b: Board) => number,
+    calcHeuristic: (board: Board) => number,
 }
 
 class PositionOneTile implements SolveStrategy {
@@ -150,8 +150,8 @@ class PositionOneTile implements SolveStrategy {
         return board.state[this.destIndex] === this.tile;
     }
 
-    buildCompareBoards(): (a: Board, b: Board) => number {
-        return (a: Board, b: Board) => this.calcManhattanDistance(a) + a.path.length < this.calcManhattanDistance(b) + b.path.length ? -1 : 1;
+    calcHeuristic(board: Board): number {
+        return this.calcManhattanDistance(board) + board.path.length;
     }
 
     private calcManhattanDistance(board: Board) {
@@ -188,8 +188,8 @@ class PositionManyTiles implements SolveStrategy {
         return this.listOfTileAndDestIndex.every(tileAndDestIndex => board.state[tileAndDestIndex[1]] === tileAndDestIndex[0]);
     }
 
-    buildCompareBoards(): (a: Board, b: Board) => number {
-        return (a: Board, b: Board) => this.calcManhattanDistance(a) + a.path.length < this.calcManhattanDistance(b) + b.path.length ? -1 : 1;
+    calcHeuristic(board: Board): number {
+        return this.calcManhattanDistance(board) + board.path.length;
     }
 
     private calcManhattanDistance(board: Board): number {
