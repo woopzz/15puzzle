@@ -1,7 +1,7 @@
 export const SOLVED_BOARD_STATE = '0123456789ABCDEF';
 export const BLANK_TILE = 'F';
 
-export class Board implements Board {
+export class Board {
     readonly state: string;
     readonly path: Array<number>;
     readonly blankTileIndex: number;
