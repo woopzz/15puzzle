@@ -1,3 +1,6 @@
+use rand::thread_rng;
+use rand::seq::SliceRandom;
+
 type Tiles = [char; 16];
 type TileIndex = usize;
 
@@ -36,41 +39,55 @@ impl Board {
         return Board { state, path };
     }
 
-    fn get_blank_tile_index(&self) -> TileIndex {
-        return self.state.iter().position(|&x| x == BLANK_TILE).unwrap();
-    }
-
-}
-
-fn check_solvable(board: &str) -> bool {
-    let empty_box_on_row_with_ddd_index = find_empty_box_row_reversed_index(board) & 1;
-    let inversions_count_is_odd_number = calc_inversions_count(board) & 1;
-    return (empty_box_on_row_with_ddd_index ^ inversions_count_is_odd_number) != 0;
-}
-
-fn find_empty_box_row_reversed_index(board: &str) -> u16 {
-    let index = board.chars().position(|x| x == BLANK_TILE).unwrap();
-    return 4 - (((index / 4) as f32).floor() as u16);
-}
-
-fn calc_inversions_count(board: &str) -> u16 {
-    let mut count = 0;
-    let chars: Vec<char> = board.chars().collect();
-    let length = board.len();
-
-    for i in 0..length {
-        for j in (i+1)..length {
-            if
-                chars[i] != BLANK_TILE
-                && chars[j] != BLANK_TILE
-                && chars[i] > chars[j]
-            {
-                count += 1;
+    fn shuffle(&self) -> Board {
+        let mut board = Board { state: self.state.clone(), path: vec![] };
+        let mut rng = thread_rng();
+        loop {
+            board.state.shuffle(&mut rng);
+            if board.check_solvable() && !board.check_solved() {
+                return board;
             }
         }
     }
 
-    return count;
+    fn get_blank_tile_index(&self) -> TileIndex {
+        return self.state.iter().position(|&x| x == BLANK_TILE).unwrap();
+    }
+
+    fn check_solvable(&self) -> bool {
+        let empty_box_on_row_with_ddd_index = self.find_empty_box_row_reversed_index() & 1;
+        let inversions_count_is_odd_number = self.calc_inversions_count() & 1;
+        return (empty_box_on_row_with_ddd_index ^ inversions_count_is_odd_number) != 0;
+    }
+
+    fn check_solved(&self) -> bool {
+        return self.state == SOLVED_BOARD_STATE;
+    }
+
+    fn find_empty_box_row_reversed_index(&self) -> u16 {
+        let index = self.state.iter().position(|&x| x == BLANK_TILE).unwrap();
+        return 4 - (((index / 4) as f32).floor() as u16);
+    }
+
+    fn calc_inversions_count(&self) -> u16 {
+        let mut count = 0;
+        let length = self.state.len();
+
+        for i in 0..length {
+            for j in (i+1)..length {
+                if
+                    self.state[i] != BLANK_TILE
+                    && self.state[j] != BLANK_TILE
+                    && self.state[i] > self.state[j]
+                {
+                    count += 1;
+                }
+            }
+        }
+
+        return count;
+    }
+
 }
 
 #[cfg(test)]
@@ -128,6 +145,40 @@ mod tests {
             b5.step(14).step(10).step(9).step(13).step(14).path,
             vec![14, 10, 9, 13, 14],
         );
+    }
+
+    #[test]
+    fn should_identify_unsolvable_boards() {
+        assert_eq!(
+            Board {
+                state: ['2', 'C', '4', 'E', '8', '5', '7', 'F', '9', '6', '0', 'D', 'B', '1', 'A', '3'],
+                path: vec![],
+            }.check_solvable(),
+            false,
+        );
+        assert_eq!(
+            Board {
+                state: ['0', 'C', '1', '8', '7', 'F', 'E', '6', '2', '9', 'A', 'D', '4', '5', '3', 'B'],
+                path: vec![],
+            }.check_solvable(),
+            false,
+        );
+        assert_eq!(
+            Board {
+                state: ['5', '0','8', '9', '2', '3', 'D', '6', 'B', 'E', '1', 'A', 'F', 'C', '7', '4'],
+                path: vec![],
+            }.check_solvable(),
+            true,
+        );
+    }
+
+    #[test]
+    fn should_return_a_solvable_board() {
+        let board = Board {
+            state: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'],
+            path: vec![],
+        };
+        assert!(board.shuffle().check_solvable());
     }
 
 }
