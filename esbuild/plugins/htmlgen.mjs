@@ -37,7 +37,7 @@ function get_js_css_file_names(pathes) {
 }
 
 function renderHtml(js_fnames, css_fnames) {
-    const js = js_fnames.map(fname => `<script defer="defer" src="${fname}"></script>`).join('');
+    const js = js_fnames.map(fname => `<script type="module" defer="defer" src="${fname}"></script>`).join('');
     const css = css_fnames.map(fname => `<link rel="stylesheet" href="${fname}">`).join('');
     return `
         <!DOCTYPE html>

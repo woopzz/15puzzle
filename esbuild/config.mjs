@@ -9,6 +9,10 @@ await esbuild.build({
     tsconfig: './tsconfig.json',
     bundle: true,
     minify: true,
+    format: 'esm',
     metafile: true,
     plugins: [pluginCleanup, pluginHtmlGenerator],
+    loader: {
+        '.wasm': 'file',
+    }
 });

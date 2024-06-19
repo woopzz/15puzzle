@@ -4,6 +4,8 @@ import { Board, solved, SOLVED_BOARD_STATE } from './game/board';
 import { Shuffle } from './game/shuffle';
 import { Solve } from './game/solve';
 
+import wasm_init, { autosolve } from 'wasm-15puzzle';
+
 const TILE_LABEL_TO_REPR = new Map<string, string>([
     ['1', '0'], ['2', '1'], ['3', '2'], ['4', '3'],
     ['5', '4'], ['6', '5'], ['7', '6'], ['8', '7'],
@@ -63,8 +65,7 @@ function init(): void {
     });
 
     document.querySelector('.hint').addEventListener('click', function () {
-        const solvedBoard = new Solve(board).execute();
-        path = solvedBoard.path.reverse();
+        path = Array.from(autosolve(board.state)).reverse();
         _repaintUI();
     });
 
@@ -77,5 +78,7 @@ function init(): void {
     _repaintUI();
 }
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-else init();
+wasm_init().then(() => {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+});
