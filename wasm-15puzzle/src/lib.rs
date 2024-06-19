@@ -357,7 +357,9 @@ trait SolveStrategy {
     fn check_solved(&self, board: &Board) -> bool;
 
     fn calc_heuristic(&self, board: &Board) -> i32 {
-        return -self.calc_manhattan_distance(board);
+        // It looks like vectors do not memorize its length. So the len() takes up quite a bit of time.
+        // But we need to include the path length to the heuristic because it optimizes the step count.
+        return -self.calc_manhattan_distance(board) - (board.path.len() as i32);
     }
 
     fn calc_manhattan_distance(&self, board: &Board) -> i32;
