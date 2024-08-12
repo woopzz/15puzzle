@@ -4,7 +4,7 @@ import { Board, solved, SOLVED_BOARD_STATE } from './game/board';
 import { Shuffle } from './game/shuffle';
 import { Solve } from './game/solve';
 
-import wasm_init, { autosolve } from 'wasm-15puzzle';
+import wasm_init, { autosolve, start } from 'wasm-15puzzle';
 
 const TILE_LABEL_TO_REPR = new Map<string, string>([
     ['1', '0'], ['2', '1'], ['3', '2'], ['4', '3'],
@@ -75,6 +75,7 @@ function init(): void {
         _repaintUI();
     });
 
+    start();
     _repaintUI();
 }
 

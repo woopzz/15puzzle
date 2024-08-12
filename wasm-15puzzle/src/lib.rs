@@ -574,3 +574,36 @@ mod tests {
     }
 
 }
+
+#[wasm_bindgen]
+pub fn start() {
+    let window = web_sys::window().expect("Could not access the window.");
+    let document = window.document().expect("Could not access the document of the window.");
+    let body = document.body().expect("Could not get the document of the body.");
+
+    // Set up the hint button.
+
+    let button_hint_as_element = document.query_selector(".hint")
+        .expect("An error occured during searching for the hint button.")
+        .expect("Could not find the hint button.");
+    let button_hint = button_hint_as_element
+        .dyn_ref::<web_sys::HtmlElement>()
+        .expect("Could not cast the hint button to be `HtmlElement`.");
+
+    let handler_button_hint = Closure::<dyn Fn()>::new(move || web_sys::console::log_1(&"Clicked on the hint button.".into()));
+    button_hint.set_onclick(Some(handler_button_hint.as_ref().unchecked_ref()));
+    handler_button_hint.forget();
+
+    // Set up the shuffle button.
+
+    let button_shuffle_as_element = document.query_selector(".shuffle")
+        .expect("An error occured during searching for the shuffle button.")
+        .expect("Could not find the shuffle button.");
+    let button_shuffle = button_shuffle_as_element
+        .dyn_ref::<web_sys::HtmlElement>()
+        .expect("Could not cast the shuffle button to be `HtmlElement`.");
+
+    let handler_button_shuffle = Closure::<dyn Fn()>::new(move || web_sys::console::log_1(&"Clicked on the shuffle button.".into()));
+    button_shuffle.set_onclick(Some(handler_button_shuffle.as_ref().unchecked_ref()));
+    handler_button_shuffle.forget();
+}
