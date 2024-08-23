@@ -44,13 +44,12 @@ impl Board {
         return Board { state, path };
     }
 
-    fn shuffle(&self) -> Board {
-        let mut board = Board { state: self.state.clone(), path: vec![] };
+    fn shuffle(&mut self) -> &mut Self {
         let mut rng = thread_rng();
         loop {
-            board.state.shuffle(&mut rng);
-            if board.check_solvable() && !board.check_solved() {
-                return board;
+            self.state.shuffle(&mut rng);
+            if self.check_solvable() && !self.check_solved() {
+                return self;
             }
         }
     }
@@ -538,7 +537,7 @@ mod tests {
 
     #[test]
     fn should_return_a_solvable_board() {
-        let board = Board {
+        let mut board = Board {
             state: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'],
             path: vec![],
         };
