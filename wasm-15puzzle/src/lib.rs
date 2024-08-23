@@ -576,6 +576,12 @@ mod tests {
 
 #[wasm_bindgen]
 pub fn start() {
+    let rc_board = Rc::new(RefCell::new(
+        Board {
+            state: SOLVED_BOARD_STATE.clone(),
+            path: vec![],
+        }
+    ));
     let window = web_sys::window().expect("Could not access the window.");
     let document = window.document().expect("Could not access the document of the window.");
     let body = document.body().expect("Could not get the document of the body.");
