@@ -578,6 +578,7 @@ mod tests {
 
 #[wasm_bindgen]
 pub fn start() {
+    console_error_panic_hook::set_once();
     let rc_board = Rc::new(RefCell::new(
         Board {
             state: SOLVED_BOARD_STATE.clone(),
