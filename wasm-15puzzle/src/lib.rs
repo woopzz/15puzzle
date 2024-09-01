@@ -1,18 +1,21 @@
 use wasm_bindgen::prelude::*;
 
 use std::rc::Rc;
-use std::cell::{RefCell};
+use std::cell::{Ref, RefCell};
 use std::cmp::Ordering;
 use std::collections::{HashSet, BinaryHeap};
 
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 
-type Tiles = [char; 16];
+const TILES_COUNT: usize = 16;
+
+type Tile = &'static str;
+type Tiles = [Tile; TILES_COUNT];
 type TileIndex = usize;
 
-const BLANK_TILE: char = 'F';
-const SOLVED_BOARD_STATE: Tiles = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+const SOLVED_BOARD_STATE: Tiles = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"];
+const BLANK_TILE: Tile = SOLVED_BOARD_STATE[0];
 
 struct Board {
     state: Tiles,
@@ -20,6 +23,14 @@ struct Board {
 }
 
 impl Board {
+
+    fn move_tile(&self, tile: &str) -> Option<Board> {
+        let index = self.state.iter().position(|&x| x == tile)?;
+        match self.check_step(index) {
+            true => Some(self.step(index)),
+            false => None,
+        }
+    }
 
     fn check_step(&self, tile_index: TileIndex) -> bool {
         if tile_index < 0 || tile_index > 15 {
@@ -97,7 +108,7 @@ impl Board {
 }
 
 struct LockedTiles {
-    state: [bool; 16],
+    state: [bool; TILES_COUNT],
 }
 
 impl LockedTiles {
@@ -150,20 +161,20 @@ impl PartialEq for RankedBoard {
 
 impl Eq for RankedBoard {}
 
-#[wasm_bindgen]
-pub fn autosolve(tiles_as_str: &str) -> Vec<usize> {
-    let mut tiles = [
-        '0', '0', '0', '0',
-        '0', '0', '0', '0',
-        '0', '0', '0', '0',
-        '0', '0', '0', '0',
-    ];
-    for (index, chr) in tiles_as_str.chars().enumerate() {
-        tiles[index] = chr;
-    }
-    let mut autosolver = Autosolver::new(Board { state: tiles, path: vec![] });
-    return autosolver.execute().path;
-}
+// #[wasm_bindgen]
+// pub fn autosolve(tiles_as_str: &str) -> Vec<usize> {
+//     let mut tiles = [
+//         '0', '0', '0', '0',
+//         '0', '0', '0', '0',
+//         '0', '0', '0', '0',
+//         '0', '0', '0', '0',
+//     ];
+//     for (index, chr) in tiles_as_str.chars().enumerate() {
+//         tiles[index] = chr;
+//     }
+//     let mut autosolver = Autosolver::new(Board { state: tiles, path: vec![] });
+//     return autosolver.execute().path;
+// }
 
 struct Autosolver {
     board: Board,
@@ -181,45 +192,45 @@ impl Autosolver {
         // TODO Fix it. It's not a good solution.
         let mut board = Board { state: self.board.state, path: vec![] };
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(['0'])) {
-            board = self.bfs(board, PositionOneTile { tile: '0', dest_index: 0 });
+        if !self.check_tiles_on_their_places(&board, HashSet::from(["0"])) {
+            board = self.bfs(board, PositionOneTile { tile: "0", dest_index: 0 });
         }
         self.locked_tiles.lock(0);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(['1'])) {
-            board = self.bfs(board, PositionOneTile { tile: '1', dest_index: 1 });
+        if !self.check_tiles_on_their_places(&board, HashSet::from(["1"])) {
+            board = self.bfs(board, PositionOneTile { tile: "1", dest_index: 1 });
         }
         self.locked_tiles.lock(1);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(['4'])) {
-            board = self.bfs(board, PositionOneTile { tile: '4', dest_index: 4 });
+        if !self.check_tiles_on_their_places(&board, HashSet::from(["4"])) {
+            board = self.bfs(board, PositionOneTile { tile: "4", dest_index: 4 });
         }
         self.locked_tiles.lock(4);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(['5'])) {
-            board = self.bfs(board, PositionOneTile { tile: '5', dest_index: 5 });
+        if !self.check_tiles_on_their_places(&board, HashSet::from(["5"])) {
+            board = self.bfs(board, PositionOneTile { tile: "5", dest_index: 5 });
         }
         self.locked_tiles.lock(5);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(['2', '3'])) {
-            board = self.bfs(board, PositionManyTiles { tiles: vec!['2', '3', BLANK_TILE], dest_indexes: vec![3, 10, 6] });
+        if !self.check_tiles_on_their_places(&board, HashSet::from(["2", "3"])) {
+            board = self.bfs(board, PositionManyTiles { tiles: vec!["2", "3", BLANK_TILE], dest_indexes: vec![3, 10, 6] });
             board = self.apply_formula(board);
         }
         self.locked_tiles.lock(2);
         self.locked_tiles.lock(3);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(['6', '7'])) {
-            board = self.bfs(board, PositionManyTiles { tiles: vec!['6', '7', BLANK_TILE], dest_indexes: vec![7, 14, 10] });
+        if !self.check_tiles_on_their_places(&board, HashSet::from(["6", "7"])) {
+            board = self.bfs(board, PositionManyTiles { tiles: vec!["6", "7", BLANK_TILE], dest_indexes: vec![7, 14, 10] });
             board = self.apply_formula(board);
         }
         self.locked_tiles.lock(6);
         self.locked_tiles.lock(7);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(['8', '9', 'A', 'B', 'C', 'D', 'E', 'F'])) {
+        if !self.check_tiles_on_their_places(&board, HashSet::from(["8", "9", "10", "11", "12", "13", "14", "15"])) {
             board = self.bfs(
                 board,
                 PositionManyTiles {
-                    tiles: vec!['8', '9', 'A', 'B', 'C', 'D', 'E', 'F'],
+                    tiles: vec!["8", "9", "10", "11", "12", "13", "14", "15"],
                     dest_indexes: vec![8, 9, 10, 11, 12, 13, 14, 15],
                 },
             );
@@ -228,7 +239,7 @@ impl Autosolver {
         return board;
     }
 
-    fn check_tiles_on_their_places(&self, board: &Board, tiles: HashSet<char>) -> bool {
+    fn check_tiles_on_their_places(&self, board: &Board, tiles: HashSet<Tile>) -> bool {
         for (tile, solved_board_tile) in board.state.iter().zip(SOLVED_BOARD_STATE.iter()) {
             if tiles.contains(solved_board_tile) && tile != solved_board_tile {
                 return false;
@@ -387,7 +398,7 @@ trait SolveStrategy {
 }
 
 struct PositionOneTile {
-    tile: char,
+    tile: Tile,
     dest_index: TileIndex,
 }
 
@@ -420,7 +431,7 @@ impl SolveStrategy for PositionOneTile {
 }
 
 struct PositionManyTiles {
-    tiles: Vec<char>,
+    tiles: Vec<Tile>,
     dest_indexes: Vec<TileIndex>,
 }
 
@@ -586,7 +597,9 @@ pub fn start() {
         }
     ));
     rc_board.borrow_mut().shuffle();
+    init_cells(Rc::clone(&rc_board));
     init_shuffle_button(Rc::clone(&rc_board));
+    repaint(rc_board.borrow());
 }
 
 fn get_document() -> web_sys::Document {
@@ -607,8 +620,56 @@ fn init_shuffle_button(rc_board: Rc<RefCell<Board>>) {
 
     let handler_button_shuffle = Closure::<dyn Fn()>::new(move || {
         rc_board.borrow_mut().shuffle();
-        // TODO Repaint.
+        repaint(rc_board.borrow());
     });
     button_shuffle.set_onclick(Some(handler_button_shuffle.as_ref().unchecked_ref()));
     handler_button_shuffle.forget();
+}
+
+fn init_cells(rc_board: Rc<RefCell<Board>>) {
+    let field_as_element = get_document()
+        .query_selector(".field")
+        .expect("An error occured during searching for the field container.")
+        .expect("Could not find the field container.");
+    let field = field_as_element
+        .dyn_ref::<web_sys::HtmlElement>()
+        .expect("Could not cast the field container to be `HtmlElement`.");
+
+    let handler_field = Closure::<dyn FnMut(web_sys::Event)>::new(move |ev: web_sys::Event| {
+        if let Some(target) = ev.target() {
+            let cell: web_sys::HtmlElement = target.dyn_into()
+                .expect("Could not cast the event target to be `HtmlElement`.");
+            if !cell.class_list().contains("box") {
+                return;
+            }
+
+            let tile = cell.dataset().get("number")
+                .expect("Could not find a tile number in dataset.");
+
+            let mb_new_board = rc_board.borrow().move_tile(&tile);
+            if let Some(new_board) = mb_new_board {
+                rc_board.replace(new_board);
+                repaint(rc_board.borrow());
+            }
+        }
+    });
+    field.set_onclick(Some(handler_field.as_ref().unchecked_ref()));
+    handler_field.forget();
+}
+
+fn repaint(board: Ref<'_, Board>) {
+    let cells_as_elements = get_document()
+        .query_selector_all(".field > .box")
+        .expect("An error occured during searching for cell buttons.");
+
+    for i in 0..TILES_COUNT {
+        if let Some(cell_as_element) = cells_as_elements.get(i as u32) {
+            let cell = cell_as_element
+                .dyn_ref::<web_sys::HtmlElement>()
+                .expect("Could not cast a cell node to be `HtmlElement`.");
+
+            let tile = board.state.get(i as usize).unwrap();
+            cell.dataset().set("number", tile).expect("Could not set a tile number.");
+        }
+    }
 }

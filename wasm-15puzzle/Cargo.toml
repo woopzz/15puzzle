@@ -22,5 +22,9 @@ features = [
     "NodeList",
     "Window",
     "console",
+    "Event",
+    "EventTarget",
     "EventListener",
+    "DomStringMap",
+    "DomTokenList",
 ]
