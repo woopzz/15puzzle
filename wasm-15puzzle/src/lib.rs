@@ -161,21 +161,6 @@ impl PartialEq for RankedBoard {
 
 impl Eq for RankedBoard {}
 
-// #[wasm_bindgen]
-// pub fn autosolve(tiles_as_str: &str) -> Vec<usize> {
-//     let mut tiles = [
-//         '0', '0', '0', '0',
-//         '0', '0', '0', '0',
-//         '0', '0', '0', '0',
-//         '0', '0', '0', '0',
-//     ];
-//     for (index, chr) in tiles_as_str.chars().enumerate() {
-//         tiles[index] = chr;
-//     }
-//     let mut autosolver = Autosolver::new(Board { state: tiles, path: vec![] });
-//     return autosolver.execute().path;
-// }
-
 struct Autosolver {
     board: Board,
     locked_tiles: LockedTiles,
@@ -587,8 +572,8 @@ mod tests {
 
 }
 
-#[wasm_bindgen]
-pub fn start() {
+#[wasm_bindgen(start)]
+fn start() {
     console_error_panic_hook::set_once();
     let rc_board = Rc::new(RefCell::new(
         Board {
