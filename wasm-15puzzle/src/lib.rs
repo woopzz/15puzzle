@@ -457,19 +457,15 @@ mod tests {
     #[test]
     fn should_check_that_a_tile_can_be_moved() {
         let b1 = Board {
-            state: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'],
+            state: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "0"],
             path: vec![],
         };
         assert_eq!(b1.check_step(0), false);
         assert_eq!(b1.check_step(10), false);
         assert_eq!(b1.check_step(100), false);
 
-        // 0 1 2 3
-        // 4 5 6 7
-        // 8 9 F A
-        // C D E B
         let b2 = Board {
-            state: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'F', 'A', 'C', 'D', 'E', 'B'],
+            state: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "0", "11", "12", "13", "14", "15"],
             path: vec![],
         };
         assert_eq!(b2.check_step(6), true);
@@ -480,29 +476,29 @@ mod tests {
 
     #[test]
     fn should_replace_a_tile_with_the_blank_one() {
-        let b3 = Board {
-            state: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'],
+        let b1 = Board {
+            state: SOLVED_BOARD_STATE.clone(),
             path: vec![],
         };
-        assert_eq!(b3.step(11).state, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'F', 'C', 'D', 'E', 'B']);
-        assert_eq!(b3.step(14).state, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'F', 'E']);
+        assert_eq!(b1.step(11).state, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "0", "13", "14", "15", "12"]);
+        assert_eq!(b1.step(14).state, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "0", "15"]);
 
-        let b4 = Board {
-            state: ['F', '1', '2', '3', '0', '5', '6', '7', '4', '9', 'A', 'B', '8', 'C', 'D', 'E'],
+        let b2 = Board {
+            state: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
             path: vec![],
         };
-        assert_eq!(b4.step(4).state, ['0', '1', '2', '3', 'F', '5', '6', '7', '4', '9', 'A', 'B', '8', 'C', 'D', 'E']);
-        assert_eq!(b4.step(1).state, ['1', 'F', '2', '3', '0', '5', '6', '7', '4', '9', 'A', 'B', '8', 'C', 'D', 'E']);
+        assert_eq!(b2.step(4).state, ["4", "1", "2", "3", "0", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]);
+        assert_eq!(b2.step(1).state, ["1", "0", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]);
     }
 
     #[test]
     fn should_remember_moved_tiles_in_a_right_order() {
-        let b5 = Board {
-            state: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'],
+        let b1 = Board {
+            state: SOLVED_BOARD_STATE.clone(),
             path: vec![],
         };
         assert_eq!(
-            b5.step(14).step(10).step(9).step(13).step(14).path,
+            b1.step(14).step(10).step(9).step(13).step(14).path,
             vec![14, 10, 9, 13, 14],
         );
     }
@@ -511,21 +507,21 @@ mod tests {
     fn should_identify_unsolvable_boards() {
         assert_eq!(
             Board {
-                state: ['2', 'C', '4', 'E', '8', '5', '7', 'F', '9', '6', '0', 'D', 'B', '1', 'A', '3'],
+                state: ["3", "13", "5", "15", "9", "6", "8", "0", "10", "7", "1", "14", "12", "2", "11", "4"],
                 path: vec![],
             }.check_solvable(),
             false,
         );
         assert_eq!(
             Board {
-                state: ['0', 'C', '1', '8', '7', 'F', 'E', '6', '2', '9', 'A', 'D', '4', '5', '3', 'B'],
+                state: ["1", "13", "2", "9", "8", "0", "15", "7", "3", "10", "11", "14", "5", "6", "4", "12"],
                 path: vec![],
             }.check_solvable(),
             false,
         );
         assert_eq!(
             Board {
-                state: ['5', '0','8', '9', '2', '3', 'D', '6', 'B', 'E', '1', 'A', 'F', 'C', '7', '4'],
+                state: ["6", "1", "9", "10", "3", "4", "14", "7", "12", "15", "2", "11", "0", "13", "8", "5"],
                 path: vec![],
             }.check_solvable(),
             true,
@@ -535,7 +531,7 @@ mod tests {
     #[test]
     fn should_return_a_solvable_board() {
         let mut board = Board {
-            state: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'],
+            state: SOLVED_BOARD_STATE.clone(),
             path: vec![],
         };
         assert!(board.shuffle().check_solvable());
@@ -543,30 +539,25 @@ mod tests {
 
     #[test]
     fn should_find_a_way_to_get_the_solved_board() {
-        let board = Board {
-            state: ['5', '0', '8', '9', '2', '3', 'D', '6', 'B', 'E', '1', 'A', 'F', 'C', '7', '4'],
+        let mut board = Board {
+            state: ["6", "1", "9", "10", "3", "4", "14", "7", "12", "15", "2", "11", "0", "13", "8", "5"],
             path: vec![],
         };
-        let mut autosolver = Autosolver::new(board);
-        let solved_board = autosolver.execute();
-        assert_eq!(solved_board.state, SOLVED_BOARD_STATE);
+        let mut autosolver = Autosolver::new();
+        let path = autosolver.execute(board.state.clone());
 
-        let mut board2 = Board {
-            state: ['5', '0', '8', '9', '2', '3', 'D', '6', 'B', 'E', '1', 'A', 'F', 'C', '7', '4'],
-            path: vec![],
-        };
-        for tile in solved_board.path {
-            board2 = board2.step(tile);
+        for tile in path {
+            board = board.step(tile);
         }
-        assert_eq!(board2.state, SOLVED_BOARD_STATE);
+        assert_eq!(board.state, SOLVED_BOARD_STATE);
     }
 
     #[test]
     fn should_return_an_empty_path_if_the_board_is_solved_in_the_first_place() {
         let board = Board { state: SOLVED_BOARD_STATE.clone(), path: vec![] };
-        let mut autosolver = Autosolver::new(board);
-        let solved_board = autosolver.execute();
-        assert_eq!(solved_board.path.len(), 0);
+        let mut autosolver = Autosolver::new();
+        let path = autosolver.execute(board.state.clone());
+        assert_eq!(path.len(), 0);
     }
 
 }
