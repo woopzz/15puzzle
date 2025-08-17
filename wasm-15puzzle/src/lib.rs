@@ -1,10 +1,10 @@
 use wasm_bindgen::prelude::*;
 
 mod solver;
-use crate::solver::{Board, Path, Autosolver, TILES_COUNT};
+use crate::solver::{Autosolver, Board, Path, TILES_COUNT};
 
-use std::rc::Rc;
 use std::cell::{Ref, RefCell};
+use std::rc::Rc;
 
 struct AppState {
     board: Board,
@@ -18,7 +18,10 @@ fn start() {
         state: solver::SOLVED_BOARD_STATE.clone(),
         path: vec![],
     };
-    let rc_app_state = Rc::new(RefCell::new(AppState { board: init_board, path: vec![] }));
+    let rc_app_state = Rc::new(RefCell::new(AppState {
+        board: init_board,
+        path: vec![],
+    }));
     rc_app_state.borrow_mut().board.shuffle();
     init_cells(Rc::clone(&rc_app_state));
     init_shuffle_button(Rc::clone(&rc_app_state));
@@ -28,14 +31,17 @@ fn start() {
 
 fn get_document() -> web_sys::Document {
     let window = web_sys::window().expect("Could not access the window.");
-    let document = window.document().expect("Could not access the document of the window.");
+    let document = window
+        .document()
+        .expect("Could not access the document of the window.");
     return document;
 }
 
 fn init_shuffle_button(rc_app_state: Rc<RefCell<AppState>>) {
     let document = get_document();
 
-    let button_shuffle_as_element = document.query_selector(".shuffle")
+    let button_shuffle_as_element = document
+        .query_selector(".shuffle")
         .expect("An error occured during searching for the shuffle button.")
         .expect("Could not find the shuffle button.");
     let button_shuffle = button_shuffle_as_element
@@ -53,7 +59,8 @@ fn init_shuffle_button(rc_app_state: Rc<RefCell<AppState>>) {
 fn init_autosolve_button(rc_app_state: Rc<RefCell<AppState>>) {
     let document = get_document();
 
-    let button_hint_as_element = document.query_selector(".hint")
+    let button_hint_as_element = document
+        .query_selector(".hint")
         .expect("An error occured during searching for the hint button.")
         .expect("Could not find the hint button.");
     let button_hint = button_hint_as_element
@@ -82,20 +89,22 @@ fn init_cells(rc_app_state: Rc<RefCell<AppState>>) {
 
     let handler_field = Closure::<dyn FnMut(web_sys::Event)>::new(move |ev: web_sys::Event| {
         if let Some(target) = ev.target() {
-            let cell: web_sys::HtmlElement = target.dyn_into()
+            let cell: web_sys::HtmlElement = target
+                .dyn_into()
                 .expect("Could not cast the event target to be `HtmlElement`.");
             if !cell.class_list().contains("box") {
                 return;
             }
 
-            let tile = cell.dataset().get("number")
+            let tile = cell
+                .dataset()
+                .get("number")
                 .expect("Could not find a tile number in dataset.");
 
             let mut app_state = rc_app_state.borrow_mut();
             let mb_new_board = app_state.board.move_tile(&tile);
             if let Some(new_board) = mb_new_board {
-                if
-                    app_state.path.len() > 0
+                if app_state.path.len() > 0
                     && *app_state.path.last().unwrap() == *new_board.path.last().unwrap()
                 {
                     app_state.path.pop();
@@ -108,7 +117,6 @@ fn init_cells(rc_app_state: Rc<RefCell<AppState>>) {
 
                 repaint(rc_app_state.borrow());
             }
-
         }
     });
     field.set_onclick(Some(handler_field.as_ref().unchecked_ref()));
@@ -127,17 +135,24 @@ fn repaint(app_state: Ref<'_, AppState>) {
                 .expect("Could not cast a cell node to be `HtmlElement`.");
 
             let tile = app_state.board.state.get(i as usize).unwrap();
-            cell.dataset().set("number", tile).expect("Could not set a tile number.");
-            cell.style().set_property("background-color", "").expect("Could not update the attr background-color.");
+            cell.dataset()
+                .set("number", tile)
+                .expect("Could not set a tile number.");
+            cell.style()
+                .set_property("background-color", "")
+                .expect("Could not update the attr background-color.");
         }
     }
 
     if app_state.path.len() > 0 {
-        if let Some(cell_as_element) = cells_as_elements.get(*app_state.path.last().unwrap() as u32) {
+        if let Some(cell_as_element) = cells_as_elements.get(*app_state.path.last().unwrap() as u32)
+        {
             let cell = cell_as_element
-                    .dyn_ref::<web_sys::HtmlElement>()
-                    .expect("Could not cast a cell node to be `HtmlElement`.");
-            cell.style().set_property("background-color", "#bbb").expect("Could not update the attr background-color.");
+                .dyn_ref::<web_sys::HtmlElement>()
+                .expect("Could not cast a cell node to be `HtmlElement`.");
+            cell.style()
+                .set_property("background-color", "#bbb")
+                .expect("Could not update the attr background-color.");
         }
     }
 
@@ -152,5 +167,8 @@ fn repaint(app_state: Ref<'_, AppState>) {
         true => "block",
         false => "none",
     };
-    won_msg_node.style().set_property("display", display_value).expect("Could not update the attr display.");
+    won_msg_node
+        .style()
+        .set_property("display", display_value)
+        .expect("Could not update the attr display.");
 }
