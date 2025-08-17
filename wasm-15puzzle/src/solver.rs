@@ -6,15 +6,15 @@ use rand::thread_rng;
 
 pub const TILES_COUNT: usize = 16;
 
-pub type Tile = &'static str;
-pub type Tiles = [Tile; TILES_COUNT];
-pub type TileIndex = usize;
+type Tile = u8;
+type Tiles = [Tile; TILES_COUNT];
+type TileIndex = usize;
 pub type Path = Vec<TileIndex>;
 
+const BLANK_TILE: Tile = 0;
 pub const SOLVED_BOARD_STATE: Tiles = [
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "0",
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, BLANK_TILE,
 ];
-pub const BLANK_TILE: Tile = "0";
 
 pub struct Board {
     pub state: Tiles,
@@ -22,7 +22,7 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn move_tile(&self, tile: &str) -> Option<Board> {
+    pub fn move_tile(&self, tile: Tile) -> Option<Board> {
         let index = self.state.iter().position(|&x| x == tile)?;
         match self.check_step(index) {
             true => Some(self.step(index)),
@@ -30,8 +30,8 @@ impl Board {
         }
     }
 
-    pub fn check_step(&self, tile_index: TileIndex) -> bool {
-        if tile_index < 0 || tile_index > 15 {
+    fn check_step(&self, tile_index: TileIndex) -> bool {
+        if tile_index > 15 {
             return false;
         }
 
@@ -42,7 +42,7 @@ impl Board {
             || (tile_index + 1 == blank_tile_index && tile_index % 4 != 3);
     }
 
-    pub fn step(&self, tile_index: TileIndex) -> Board {
+    fn step(&self, tile_index: TileIndex) -> Board {
         let mut state = self.state.clone();
         let blank_tile_index = self.get_blank_tile_index();
         state[blank_tile_index] = state[tile_index];
@@ -162,55 +162,55 @@ impl Autosolver {
             path: vec![],
         };
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(["1"])) {
+        if !self.check_tiles_on_their_places(&board, HashSet::from([1])) {
             board = self.bfs(
                 board,
                 PositionOneTile {
-                    tile: "1",
+                    tile: 1,
                     dest_index: 0,
                 },
             );
         }
         self.locked_tiles.lock(0);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(["2"])) {
+        if !self.check_tiles_on_their_places(&board, HashSet::from([2])) {
             board = self.bfs(
                 board,
                 PositionOneTile {
-                    tile: "2",
+                    tile: 2,
                     dest_index: 1,
                 },
             );
         }
         self.locked_tiles.lock(1);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(["5"])) {
+        if !self.check_tiles_on_their_places(&board, HashSet::from([5])) {
             board = self.bfs(
                 board,
                 PositionOneTile {
-                    tile: "5",
+                    tile: 5,
                     dest_index: 4,
                 },
             );
         }
         self.locked_tiles.lock(4);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(["6"])) {
+        if !self.check_tiles_on_their_places(&board, HashSet::from([6])) {
             board = self.bfs(
                 board,
                 PositionOneTile {
-                    tile: "6",
+                    tile: 6,
                     dest_index: 5,
                 },
             );
         }
         self.locked_tiles.lock(5);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(["3", "4"])) {
+        if !self.check_tiles_on_their_places(&board, HashSet::from([3, 4])) {
             board = self.bfs(
                 board,
                 PositionManyTiles {
-                    tiles: vec!["3", "4", BLANK_TILE],
+                    tiles: vec![3, 4, BLANK_TILE],
                     dest_indexes: vec![3, 10, 6],
                 },
             );
@@ -219,11 +219,11 @@ impl Autosolver {
         self.locked_tiles.lock(2);
         self.locked_tiles.lock(3);
 
-        if !self.check_tiles_on_their_places(&board, HashSet::from(["7", "8"])) {
+        if !self.check_tiles_on_their_places(&board, HashSet::from([7, 8])) {
             board = self.bfs(
                 board,
                 PositionManyTiles {
-                    tiles: vec!["7", "8", BLANK_TILE],
+                    tiles: vec![7, 8, BLANK_TILE],
                     dest_indexes: vec![7, 14, 10],
                 },
             );
@@ -232,14 +232,12 @@ impl Autosolver {
         self.locked_tiles.lock(6);
         self.locked_tiles.lock(7);
 
-        if !self.check_tiles_on_their_places(
-            &board,
-            HashSet::from(["9", "10", "11", "12", "13", "14", "15", "0"]),
-        ) {
+        if !self.check_tiles_on_their_places(&board, HashSet::from([9, 10, 11, 12, 13, 14, 15, 0]))
+        {
             board = self.bfs(
                 board,
                 PositionManyTiles {
-                    tiles: vec!["9", "10", "11", "12", "13", "14", "15", "0"],
+                    tiles: vec![9, 10, 11, 12, 13, 14, 15, 0],
                     dest_indexes: vec![8, 9, 10, 11, 12, 13, 14, 15],
                 },
             );
@@ -482,10 +480,7 @@ mod tests {
     #[test]
     fn should_check_that_a_tile_can_be_moved() {
         let b1 = Board {
-            state: [
-                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15",
-                "0",
-            ],
+            state: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0],
             path: vec![],
         };
         assert_eq!(b1.check_step(0), false);
@@ -493,10 +488,7 @@ mod tests {
         assert_eq!(b1.check_step(100), false);
 
         let b2 = Board {
-            state: [
-                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "0", "11", "12", "13", "14",
-                "15",
-            ],
+            state: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 11, 12, 13, 14, 15],
             path: vec![],
         };
         assert_eq!(b2.check_step(6), true);
@@ -513,39 +505,24 @@ mod tests {
         };
         assert_eq!(
             b1.step(11).state,
-            [
-                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "0", "13", "14", "15",
-                "12"
-            ]
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 13, 14, 15, 12]
         );
         assert_eq!(
             b1.step(14).state,
-            [
-                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "0",
-                "15"
-            ]
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 0, 15]
         );
 
         let b2 = Board {
-            state: [
-                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
-                "15",
-            ],
+            state: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
             path: vec![],
         };
         assert_eq!(
             b2.step(4).state,
-            [
-                "4", "1", "2", "3", "0", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
-                "15"
-            ]
+            [4, 1, 2, 3, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
         );
         assert_eq!(
             b2.step(1).state,
-            [
-                "1", "0", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
-                "15"
-            ]
+            [1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
         );
     }
 
@@ -565,10 +542,7 @@ mod tests {
     fn should_identify_unsolvable_boards() {
         assert_eq!(
             Board {
-                state: [
-                    "3", "13", "5", "15", "9", "6", "8", "0", "10", "7", "1", "14", "12", "2",
-                    "11", "4"
-                ],
+                state: [3, 13, 5, 15, 9, 6, 8, 0, 10, 7, 1, 14, 12, 2, 11, 4],
                 path: vec![],
             }
             .check_solvable(),
@@ -576,10 +550,7 @@ mod tests {
         );
         assert_eq!(
             Board {
-                state: [
-                    "1", "13", "2", "9", "8", "0", "15", "7", "3", "10", "11", "14", "5", "6", "4",
-                    "12"
-                ],
+                state: [1, 13, 2, 9, 8, 0, 15, 7, 3, 10, 11, 14, 5, 6, 4, 12],
                 path: vec![],
             }
             .check_solvable(),
@@ -587,10 +558,7 @@ mod tests {
         );
         assert_eq!(
             Board {
-                state: [
-                    "6", "1", "9", "10", "3", "4", "14", "7", "12", "15", "2", "11", "0", "13",
-                    "8", "5"
-                ],
+                state: [6, 1, 9, 10, 3, 4, 14, 7, 12, 15, 2, 11, 0, 13, 8, 5],
                 path: vec![],
             }
             .check_solvable(),
@@ -610,10 +578,7 @@ mod tests {
     #[test]
     fn should_find_a_way_to_get_the_solved_board() {
         let mut board = Board {
-            state: [
-                "6", "1", "9", "10", "3", "4", "14", "7", "12", "15", "2", "11", "0", "13", "8",
-                "5",
-            ],
+            state: [6, 1, 9, 10, 3, 4, 14, 7, 12, 15, 2, 11, 0, 13, 8, 5],
             path: vec![],
         };
         let mut autosolver = Autosolver::new();

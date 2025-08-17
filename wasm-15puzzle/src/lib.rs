@@ -1,10 +1,29 @@
 use wasm_bindgen::prelude::*;
 
 mod solver;
-use crate::solver::{Autosolver, Board, Path, TILES_COUNT};
+use crate::solver::{Autosolver, Board, Path, SOLVED_BOARD_STATE, TILES_COUNT};
 
 use std::cell::{Ref, RefCell};
 use std::rc::Rc;
+
+const TILE_AND_REPR: [(u8, &str); TILES_COUNT] = [
+    (0, "0"),
+    (1, "1"),
+    (2, "2"),
+    (3, "3"),
+    (4, "4"),
+    (5, "5"),
+    (6, "6"),
+    (7, "7"),
+    (8, "8"),
+    (9, "9"),
+    (10, "10"),
+    (11, "11"),
+    (12, "12"),
+    (13, "13"),
+    (14, "14"),
+    (15, "15"),
+];
 
 struct AppState {
     board: Board,
@@ -15,7 +34,7 @@ struct AppState {
 fn start() {
     console_error_panic_hook::set_once();
     let init_board = Board {
-        state: solver::SOLVED_BOARD_STATE.clone(),
+        state: SOLVED_BOARD_STATE.clone(),
         path: vec![],
     };
     let rc_app_state = Rc::new(RefCell::new(AppState {
@@ -96,13 +115,20 @@ fn init_cells(rc_app_state: Rc<RefCell<AppState>>) {
                 return;
             }
 
-            let tile = cell
+            let tile_repr_str = cell
                 .dataset()
                 .get("number")
                 .expect("Could not find a tile number in dataset.");
 
             let mut app_state = rc_app_state.borrow_mut();
-            let mb_new_board = app_state.board.move_tile(&tile);
+
+            let tari = TILE_AND_REPR
+                .into_iter()
+                .position(|x| x.1 == tile_repr_str)
+                .expect("Could not find a tile by a tile representation.");
+            let tile = TILE_AND_REPR[tari].0;
+
+            let mb_new_board = app_state.board.move_tile(tile);
             if let Some(new_board) = mb_new_board {
                 if app_state.path.len() > 0
                     && *app_state.path.last().unwrap() == *new_board.path.last().unwrap()
@@ -134,9 +160,15 @@ fn repaint(app_state: Ref<'_, AppState>) {
                 .dyn_ref::<web_sys::HtmlElement>()
                 .expect("Could not cast a cell node to be `HtmlElement`.");
 
-            let tile = app_state.board.state.get(i as usize).unwrap();
+            let tile = app_state.board.state[i];
+            let tari = TILE_AND_REPR
+                .into_iter()
+                .position(|x| x.0 == tile)
+                .expect("Could not find a tile representation by a tile.");
+            let tile_repr = TILE_AND_REPR[tari].1;
+
             cell.dataset()
-                .set("number", tile)
+                .set("number", tile_repr)
                 .expect("Could not set a tile number.");
             cell.style()
                 .set_property("background-color", "")
