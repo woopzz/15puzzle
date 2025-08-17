@@ -4,8 +4,7 @@
     "private": true,
     "scripts": {
         "build": "./build.sh",
-        "server": "python3 -m http.server -d ./dist",
-        "test": "jest"
+        "server": "python3 -m http.server -d ./dist"
     },
     "keywords": [],
     "author": "woopzz",
