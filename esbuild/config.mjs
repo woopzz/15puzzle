@@ -4,11 +4,14 @@ import { pluginHtmlGenerator } from './plugins/htmlgen.mjs';
 
 await esbuild.build({
     outdir: './dist',
-    entryPoints: ['./src/index.ts'],
+    entryPoints: ['./src/index.js'],
     entryNames: '[dir]/bundle.[name]-[hash]',
-    tsconfig: './tsconfig.json',
     bundle: true,
     minify: true,
+    format: 'esm',
     metafile: true,
     plugins: [pluginCleanup, pluginHtmlGenerator],
+    loader: {
+        '.wasm': 'file',
+    }
 });
