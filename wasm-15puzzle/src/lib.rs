@@ -65,7 +65,11 @@ fn init_shuffle_button(rc_app_state: Rc<RefCell<AppState>>) {
         .expect("Could not cast the shuffle button to be `HtmlElement`.");
 
     let handler_button_shuffle = Closure::<dyn Fn()>::new(move || {
-        rc_app_state.borrow_mut().board.shuffle();
+        let mut app_state = rc_app_state.borrow_mut();
+        app_state.board.shuffle();
+        app_state.path = vec![];
+        drop(app_state);
+
         repaint(rc_app_state.borrow());
     });
     button_shuffle.set_onclick(Some(handler_button_shuffle.as_ref().unchecked_ref()));
