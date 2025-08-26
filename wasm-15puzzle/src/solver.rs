@@ -12,7 +12,7 @@ type TileIndex = usize;
 pub type Path = Vec<TileIndex>;
 
 const BLANK_TILE: Tile = 0;
-pub const SOLVED_BOARD_STATE: Tiles = [
+const SOLVED_BOARD_STATE: Tiles = [
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, BLANK_TILE,
 ];
 
@@ -54,12 +54,12 @@ impl Board {
         return Board { state, path };
     }
 
-    pub fn shuffle(&mut self) -> &mut Self {
+    pub fn shuffle(&mut self) {
         let mut rng = thread_rng();
         loop {
             self.state.shuffle(&mut rng);
             if self.check_solvable() && !self.check_solved() {
-                return self;
+                break;
             }
         }
     }
@@ -99,6 +99,15 @@ impl Board {
         }
 
         return count;
+    }
+}
+
+impl Default for Board {
+    fn default() -> Self {
+        Self {
+            state: SOLVED_BOARD_STATE.clone(),
+            path: vec![],
+        }
     }
 }
 
@@ -572,7 +581,8 @@ mod tests {
             state: SOLVED_BOARD_STATE.clone(),
             path: vec![],
         };
-        assert!(board.shuffle().check_solvable());
+        board.shuffle();
+        assert!(board.check_solvable());
     }
 
     #[test]
