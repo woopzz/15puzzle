@@ -1,6 +1,6 @@
 {
     "name": "15puzzle",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "private": true,
     "scripts": {
         "build": "./build.sh",
@@ -9,9 +9,6 @@
     "keywords": [],
     "author": "woopzz",
     "license": "MIT",
-    "dependencies": {
-        "wasm-15puzzle": "file:./wasm-15puzzle/pkg"
-    },
     "devDependencies": {
         "esbuild": "0.17.18"
     }
